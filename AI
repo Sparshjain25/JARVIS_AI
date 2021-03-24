@@ -1,0 +1,163 @@
+import pyttsx3
+import datetime
+import speech_recognition as sr
+import wikipedia
+import smtplib
+import webbrowser as wb
+import os
+import pyautogui
+import psutil
+import pyjokes
+
+
+engine=pyttsx3.init()
+
+def speak(audio):
+    voices=engine.getProperty('voices')
+    engine.setProperty('voice',voices[1].id)
+    engine.say(audio)
+    engine.runAndWait()
+
+def time():
+    Time=datetime.datetime.now().strftime("%I:%M:%S")
+    speak("The current time is")
+    speak(Time)
+
+def date():
+    year=int(datetime.datetime.now().year)
+    month = int(datetime.datetime.now().month)
+    date = int(datetime.datetime.now().day)
+    speak("Today's date is")
+    speak(date)
+    speak(month)
+    speak(year)
+
+def wishme():
+    speak("Welcome back Sir!")
+    hour=datetime.datetime.now().hour
+    if hour>=5 and hour<12:
+        speak("Good Morning Sir")
+    elif hour>=12 and hour<17:
+        speak("Good Afternoon Sir!")
+    else:
+        speak("Good Evening Sir!")
+    speak("Jarvis at your service Sir Please tell me How can I help you?")
+
+def takecomand():
+    r=sr.Recognizer()
+
+    with sr.Microphone() as source:
+       print("Speak anything")
+       speak("Listening...")
+       r.adjust_for_ambient_noise(source,duration=1)
+       audio=r.listen(source)
+
+    try:
+        print("Recognizing...")
+        speak("Recognizing....")
+        text=r.recognize_google(audio)
+        speak("you said:")
+        speak(text)
+        print("You said: {}".format(text))
+    except:
+        print("Sorry! Could not hear anything")
+        return "none"
+
+    return text
+
+def sendEmail(to,content):
+    server=smtplib.SMTP('smtp.gmail.com',587)
+    server.echlo()
+    server.starttls()
+    server.login('samayjain427@gmail.com','SAMCR&THEBEST')
+    server.sendmail('samayjain427@gmail.com',to,content)
+    server.close()
+
+def screenshot():
+    img=pyautogui.screenshot()
+    img.save('C:\\Users\\Sparsh Jain\\Pictures\\Screenshots\\pic.png')
+
+def cpu():
+    usage=str(psutil.cpu_percent())
+    speak("Your CPU is at"+usage)
+    battery=psutil.sensors_battery()
+    speak("The battery is at")
+    speak(battery.percent)
+
+def jokes():
+    speak(pyjokes.get_joke())
+
+if __name__=="__main__":
+    wishme()
+    while 1:
+        query=takecomand().lower()
+        if "time" in query:
+            time()
+
+        elif "date" in query:
+            date()
+
+        elif "wikipedia" in query:
+            speak("Serching...")
+            query=query.replace("wikipedia","")
+            result=wikipedia.summary(query,sentences=3)
+            print(result)
+            speak(result)
+
+        elif "send email" in query:
+            try:
+                speak("What should I say?")
+                content=takecomand()
+                to='sparshjain2502@gmail.com'
+                sendEmail(to,content)
+            except:
+                print("Unable to send!")
+                speak("Sorry Sir!Cannot sent.")
+
+        elif "search in chrome" in query:
+            speak("What should I search?")
+            chromepath='C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+            search=takecomand().lower()
+            wb.get(chromepath).open_new_tab(search+'.com')
+
+        elif "logout" in query:
+            os.system("shutdown -l")
+
+        elif "shutdown" in query:
+            os.system("shutdown /s /t l")
+
+        elif "restart" in query:
+            os.system("shutdown /r /t l")
+
+        elif "play music" in query:
+            songs_dir='D:\English Songs'
+            songs=os.listdir(songs_dir)
+            os.startfile(os.path.join(songs_dir,songs[0]))
+
+        elif "remember that" in query:
+            speak("What should I remember?")
+            data=takecommand()
+            speak("You said me to remember that"+data)
+            remember=open('Sparsh.txt','w')
+            rmember.write(data)
+            remember.close()
+
+        elif "do you know anything" in query:
+            remember=open('Sparsh.txt','r')
+            speak("you said me ahhh"+remember.read())
+
+        elif "screenshot" in query:
+            #speak("Suggest one word for the picture")
+            #name=takecomand()
+            screenshot()
+            speak("Done!")
+
+        elif "cpu" in query:
+            cpu()
+
+        elif "jokes" in query:
+            jokes()
+
+        elif "offline" in query:
+            speak("Ok Sir. Have a good time Ahead!")
+            quit()
